@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube 우회 변환기</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #ff0000;
+      --primary-dark: #cc0000;
+      --secondary: #065fd4;
+      --secondary-dark: #0047ab;
+      --success: #00c07f;
+      --error: #ff3d71;
+      --background: #f9f9f9;
+      --card-bg: #ffffff;
+      --text: #0f0f0f;
+      --text-secondary: #606060;
+      --border-radius: 16px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--background);
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 40px;
+      width: 90%;
+      max-width: 650px;
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .container:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-5px);
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+
+    .logo {
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo svg {
+      width: 40px;
+      height: 40px;
+      margin-right: 12px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      color: var(--text);
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    .input-container {
+      position: relative;
+      margin-bottom: 25px;
+      transition: all 0.3s ease;
+    }
+
+    .input-container:focus-within {
+      transform: scale(1.02);
+    }
+
+    input {
+      width: 100%;
+      padding: 18px 25px;
+      font-size: 16px;
+      border: 2px solid #e6e6e6;
+      border-radius: var(--border-radius);
+      transition: all 0.3s ease;
+      outline: none;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    input:focus {
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 4px rgba(6, 95, 212, 0.1);
+    }
+
+    .url-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      transition: all 0.3s ease;
+    }
+
+    input:focus + .url-icon {
+      color: var(--secondary);
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 18px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(255, 0, 0, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    button:hover::after {
+      transform: translateX(0);
+    }
+
+    .btn-icon {
+      margin-left: 10px;
+      font-size: 18px;
+    }
+
+    #output {
+      width: 90%;
+      max-width: 650px;
+    }
+
+    .result-container {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 35px;
+      display: none;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .result-container.active {
+      display: block;
+      animation: slideUp 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-left: 12px;
+    }
+
+    .result-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+
+    .success-icon {
+      background-color: var(--success);
+    }
+
+    .error-icon {
+      background-color: var(--error);
+    }
+
+    .result-content {
+      margin-bottom: 25px;
+    }
+
+    .result-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .result-url {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 20px;
+      text-align: left;
+      word-break: break-all;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .copy-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--secondary);
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .copy-tooltip {
+      position: absolute;
+      right: 10px;
+      top: -25px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .copy-tooltip.show {
+      opacity: 1;
+    }
+
+    iframe {
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      background: #000;
+      aspect-ratio: 16/9;
+      transition: all 0.3s ease;
+    }
+
+    iframe:hover {
+      transform: scale(1.01);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .open-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: rgba(6, 95, 212, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .open-link:hover {
+      background: rgba(6, 95, 212, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .recommendations {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 35px;
+      width: 90%;
+      max-width: 650px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .recommendations::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(to right, #3b5998, #8a3ab9);
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title span {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background-color: #ff0000;
+      border-radius: 50%;
+      color: white;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .video-item {
+      background: var(--card-bg);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .video-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-thumbnail {
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .thumbnail-img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .video-item:hover .thumbnail-img {
+      transform: scale(1.05);
+    }
+
+    .play-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .video-item:hover .play-icon {
+      opacity: 1;
+    }
+
+    .play-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .video-info {
+      padding: 15px;
+    }
+
+    .video-title {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .video-channel {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .trending-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 0, 0, 0.85);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    footer {
+      margin-top: 50px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    .search-container {
+      position: relative;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    #searchQuery {
+      width: 100%;
+      padding-right: 50px;
+    }
+
+    .search-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      box-shadow: none;
+      color: #606060;
+      padding: 8px;
+      width: auto;
+    }
+
+    .search-btn:hover {
+      background: transparent;
+      color: var(--text);
+      transform: translateY(-50%);
+      box-shadow: none;
+    }
+
+    .search-results {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 35px;
+      width: 90%;
+      max-width: 650px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      display: none;
+    }
+
+    .search-results.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .search-results::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(to right, var(--primary), #6a11cb);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #121212;
+        --card-bg: #1e1e1e;
+        --text: #f1f1f1;
+        --text-secondary: #aaaaaa;
+      }
+
+      input {
+        background: #2a2a2a;
+        border-color: #333;
+        color: var(--text);
+      }
+
+      .result-url {
+        background: #2a2a2a;
+      }
+
+      .video-item {
+        background: #252525;
+      }
+
+      .search-btn {
+        color: #aaaaaa;
+      }
+
+      .search-btn:hover {
+        color: #ffffff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" fill="#FF0000"/>
+        <path d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#fff"/>
+      </svg>
+      <h2>유튜브 우회 변환기</h2>
+    </div>
+    <p class="subtitle">YouTube 영상을 안전한 nocookie 형식으로 변환합니다</p>
+
+    <div class="input-container">
+      <input type="text" id="youtubeUrl" placeholder="유튜브 영상 URL을 붙여넣으세요">
+    </div>
+
+    <button onclick="convertUrl()">
+      변환하기
+      <span class="btn-icon">→</span>
+    </button>
+
+    <div class="search-container">
+      <input type="text" id="searchQuery" placeholder="영상 검색하기">
+      <button onclick="searchVideos()" class="search-btn">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+  <div class="recommendations">
+    <h3 class="section-title"><span>KR</span>인기 동영상</h3>
+    <div class="video-grid" id="silence-trending">
+      <!-- js -->
+    </div>
+  </div>
+
+  <footer>&copy; 2025 유튜브 우회 변환기 • SILENCE</footer>
+
+  <script>
+    const API_KEY = 'YOUR_API_KEY_HERE'; // YouTube Data API v3
+
+    window.onload = function() {
+      document.getElementById('youtubeUrl').focus();
+      fetchTrendingVideos();
+
+      document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') searchVideos();
+      });
+
+      document.getElementById('youtubeUrl').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') convertUrl();
+      });
+    };
+
+    async function fetchTrendingVideos() {
+      try {
+        document.getElementById('silence-trending').innerHTML = '<div style="text-align: center; padding: 20px;">로딩 중...</div>';
+        const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=KR&maxResults=4&key=${API_KEY}`);
+        if (!response.ok) throw new Error('네트워크 응답이 정상이 아닙니다');
+        const data = await response.json();
+        displayFetchedVideos(data.items);
+      } catch (error) {
+        console.error('인기 영상을 가져오는 중 오류가 발생했습니다:', error);
+        displayFallbackVideos();
+      }
+    }
+
+    function displayFetchedVideos(videos) {
+      const trendingContainer = document.getElementById('silence-trending');
+      let html = '';
+
+      videos.forEach((video, index) => {
+        html += `
+          <div class="video-item" onclick="selectVideo('${video.id}')">
+            <div class="video-thumbnail">
+              <img class="thumbnail-img" src="${video.snippet.thumbnails.high.url}" alt="${video.snippet.title}">
+              <div class="play-icon">
+                <svg viewBox="0 0 24 24" fill="#ffffff">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+              </div>
+              ${index < 2 ? '<div class="trending-badge">인기</div>' : ''}
+            </div>
+            <div class="video-info">
+              <div class="video-title">${video.snippet.title}</div>
+              <div class="video-channel">${video.snippet.channelTitle}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      trendingContainer.innerHTML = html;
+    }
+
+    async function searchVideos() {
+      const query = document.getElementById('searchQuery').value.trim();
+
+      if (!query) {
+        alert('검색어를 입력해주세요.');
+        return;
+      }
+
+      try {
+        let searchResultsContainer = document.getElementById('search-results');
+
+        if (!searchResultsContainer) {
+          searchResultsContainer = document.createElement('div');
+          searchResultsContainer.id = 'search-results';
+          searchResultsContainer.className = 'search-results';
+          const recommendationsContainer = document.querySelector('.recommendations');
+          recommendationsContainer.parentNode.insertBefore(searchResultsContainer, recommendationsContainer);
+        }
+
+        searchResultsContainer.innerHTML = '<div style="text-align: center; padding: 20px;">검색 중...</div>';
+        searchResultsContainer.classList.add('active');
+
+        const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=4&regionCode=KR&key=${API_KEY}`);
+        if (!response.ok) throw new Error('네트워크 응답이 정상이 아닙니다');
+
+        const data = await response.json();
+        if (data.items.length === 0) {
+          searchResultsContainer.innerHTML = `
+            <h3 class="section-title"><span>🔍</span>검색 결과</h3>
+            <p style="text-align: center; padding: 20px;">"${query}" 검색 결과가 없습니다.</p>
+          `;
+          return;
+        }
+
+        let html = `<h3 class="section-title"><span>🔍</span>"${query}" 검색 결과</h3>`;
+        html += '<div class="video-grid">';
+
+        data.items.forEach(item => {
+          html += `
+            <div class="video-item" onclick="selectVideo('${item.id.videoId}')">
+              <div class="video-thumbnail">
+                <img class="thumbnail-img" src="${item.snippet.thumbnails.high.url}" alt="${item.snippet.title}">
+                <div class="play-icon">
+                  <svg viewBox="0 0 24 24" fill="#ffffff">
+                    <path d="M8 5v14l11-7z"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="video-info">
+                <div class="video-title">${item.snippet.title}</div>
+                <div class="video-channel">${item.snippet.channelTitle}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        searchResultsContainer.innerHTML = html;
+        searchResultsContainer.scrollIntoView({ behavior: 'smooth' });
+
+      } catch (error) {
+        console.error('영상 검색 중 오류가 발생했습니다:', error);
+        let searchResultsContainer = document.getElementById('search-results');
+        if (searchResultsContainer) {
+          searchResultsContainer.innerHTML = `
+            <h3 class="section-title"><span>🔍</span>검색 오류</h3>
+            <p style="text-align: center; padding: 20px;">검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
+          `;
+          searchResultsContainer.classList.add('active');
+        }
+      }
+    }
+
+    function displayFallbackVideos() {
+      const TrendingVideos = [
+       {
+          id: "UCQHgJ4uRwo",
+          title: "[선공개🎨] '지구가 태양을 네 번' IU Live Clip (With 넬)",
+          channel: "이지금 [IU Official]",
+          thumbnail: "https://i.ytimg.com/vi/UCQHgJ4uRwo/hqdefault.jpg",
+          isTrending: true
+        },
+        {
+          id: "gdZLi9oWNZg",
+          title: "BTS (방탄소년단) 'Dynamite' Official MV",
+          channel: "HYBE LABELS",
+          thumbnail: "https://i.ytimg.com/vi/gdZLi9oWNZg/hqdefault.jpg",
+          isTrending: true
+        },
+        {
+          id: "dyRsYk0LyA8",
+          title: "BLACKPINK - 'Lovesick Girls' M/V",
+          channel: "BLACKPINK",
+          thumbnail: "https://i.ytimg.com/vi/dyRsYk0LyA8/hqdefault.jpg",
+          isTrending: false
+        },
+        {
+          id: "F0B7HDiY-10",
+          title: "IVE 아이브 'After LIKE' MV",
+          channel: "STARSHIP",
+          thumbnail: "https://i.ytimg.com/vi/F0B7HDiY-10/hqdefault.jpg",
+          isTrending: false
+        }
+      ];
+
+      const trendingContainer = document.getElementById('silence-trending');
+      let html = '';
+
+      TrendingVideos.forEach((video, index) => {
+        const thumbnailSrc = video.thumbnail ? video.thumbnail : video.snippet?.thumbnails?.high?.url || "/api/placeholder/480/360";
+        const title = video.title || video.snippet?.title || "제목 없음";
+        const channel = video.channel || video.snippet?.channelTitle || "채널 없음";
+
+        html += `
+          <div class="video-item" onclick="selectVideo('${video.id}')">
+            <div class="video-thumbnail">
+              <img class="thumbnail-img" src="${thumbnailSrc}" alt="${title}">
+              <div class="play-icon">
+                <svg viewBox="0 0 24 24" fill="#ffffff">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+              </div>
+              ${video.isTrending || index < 2 ? '<div class="trending-badge">인기</div>' : ''}
+            </div>
+            <div class="video-info">
+              <div class="video-title">${title}</div>
+              <div class="video-channel">${channel}</div>
+            </div>
+          </div>
+        `;
+      });
+      trendingContainer.innerHTML = html;
+    }
+
+    function selectVideo(videoId) {
+      const input = document.getElementById('youtubeUrl');
+      input.value = `https://www.youtube.com/watch?v=${videoId}`;
+      convertUrl();
+      setTimeout(() => {
+        document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+
+    function convertUrl() {
+      const url = document.getElementById('youtubeUrl').value;
+      const match = url.match(/(?:v=|\.be\/)([\w-]{11})/);
+      const outputElement = document.getElementById('output');
+
+      if (!match) {
+        outputElement.innerHTML = `
+          <div class="result-container active">
+            <div class="result-header">
+              <div class="result-icon error-icon">✕</div>
+              <div class="result-title">변환 실패</div>
+            </div>
+            <p>유효한 유튜브 영상 URL이 아닙니다. 올바른 링크를 입력해주세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const videoId = match[1];
+      const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}`;
+
+      outputElement.innerHTML = `
+        <div class="result-container active">
+          <div class="result-header">
+            <div class="result-icon success-icon">✓</div>
+            <div class="result-title">변환 성공!</div>
+          </div>
+          
+          <div class="result-content">
+            <div class="result-label">우회 링크:</div>
+            <div class="result-url" id="result-url">
+              ${embedUrl}
+              <button class="copy-btn" onclick="copyToClipboard()">복사</button>
+              <span class="copy-tooltip" id="copy-tooltip">복사됨!</span>
+            </div>
+            
+            <iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
+            
+            <a href="${embedUrl}" target="_blank" class="open-link">
+              새 탭에서 열기
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function copyToClipboard() {
+      const resultUrl = document.getElementById('result-url').innerText.trim();
+      navigator.clipboard.writeText(resultUrl).then(() => {
+        const tooltip = document.getElementById('copy-tooltip');
+        tooltip.classList.add('show');
+        setTimeout(() => {
+          tooltip.classList.remove('show');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
