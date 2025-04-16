@@ -7,3 +7,7 @@
 파일 내의 <script> 부분에서 `const API_KEY = 'YOUR_API_KEY_HERE';` 를 실제 API 키로 변경해주셔야 사용하실 수 있습니다.  
 여기 [구글 API](https://console.cloud.google.com/apis/dashboard)에서 `Youtube Data API v3` 를 발급받아 작성해주세요.  
 만약 API가 옳바르게 작동하지 못할 경우 미리 지정된 동영상이 나타내게 됩니다.  
+(구글 API 발급 방법에 대해 잘 모르겠다면 [여기](https://brunch.co.kr/@mystoryg/156)를 참고하세요)
+
+# 미리보기
+![image](https://github.com/user-attachments/assets/7f2b7ed6-70fb-427a-9b5b-559241d4069e)
